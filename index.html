@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sri Guru Dakshinamurthy - Digital Learning</title>
+    
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    screens: {
+                        'xs': '375px',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Quicksand:wght@400;500;600;700&family=Tiro+Devanagari+Hindi&display=swap" rel="stylesheet">
+
+    <style>
+        /* Base Styles */
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #fff5f5 0%, #fff0e6 50%, #e6f0ff 100%);
+            min-height: 100vh;
+            color: #4a4a4a;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .font-sacred {
+            font-family: 'Cinzel Decorative', cursive;
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .glass-card:active {
+            transform: scale(0.98);
+        }
+
+        /* Claymorphism */
+        .clay-btn {
+            border-radius: 16px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.4);
+            box-shadow: 
+                inset 2px 2px 6px rgba(255, 255, 255, 0.7),
+                inset -2px -2px 6px rgba(0, 0, 0, 0.05),
+                6px 6px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .clay-btn:active {
+            box-shadow: 
+                inset 4px 4px 8px rgba(0, 0, 0, 0.05),
+                inset -4px -4px 8px rgba(255, 255, 255, 0.6);
+            transform: translateY(2px);
+        }
+
+        .clay-primary {
+            background-color: #fce7f3; /* Pinkish */
+            color: #831843;
+        }
+        .clay-accent {
+            background-color: #e0f2fe; /* Bluish */
+            color: #075985;
+        }
+        .clay-orange {
+            background-color: #ffedd5; /* Orangeish */
+            color: #9a3412;
+        }
+        .clay-green {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        .clay-purple {
+            background-color: #f3e8ff;
+            color: #6b21a8;
+        }
+        .clay-white {
+            background-color: #ffffff;
+            color: #374151;
+        }
+
+        /* Animations */
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes slide-up {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes pop-in {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .animate-spin-slow {
+            animation: spin-slow 60s linear infinite;
+        }
+        
+        .animate-slide-up {
+            animation: slide-up 0.4s ease-out forwards;
+        }
+
+        .animate-pop-in {
+            animation: pop-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- SVGs & Icons (Inline for Reliability & Performance) ---
+
+        const LotusIcon = ({ className }) => (
+            <svg viewBox="0 0 100 100" className={className} fill="currentColor">
+                <path d="M50 20 C50 20 60 40 80 40 C60 50 50 80 50 80 C50 80 40 50 20 40 C40 40 50 20 50 20 Z" opacity="0.9" />
+                <path d="M50 80 C50 80 70 70 85 55 C70 50 50 50 50 50 C50 50 30 50 15 55 C30 70 50 80 50 80 Z" opacity="0.7" />
+                <path d="M50 50 C50 50 65 35 80 25 C65 30 55 45 50 50 Z" opacity="0.6" />
+                <path d="M50 50 C50 50 35 35 20 25 C35 30 45 45 50 50 Z" opacity="0.6" />
+            </svg>
+        );
+
+        // Helper for Lucide-style icons
+        const Icon = ({ children, size = 24, className = "" }) => (
+            <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width={size} 
+                height={size} 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                className={className}
+            >
+                {children}
+            </svg>
+        );
+
+        const BookOpen = (props) => <Icon {...props}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></Icon>;
+        const Video = (props) => <Icon {...props}><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></Icon>;
+        const Download = (props) => <Icon {...props}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></Icon>;
+        const ArrowRight = (props) => <Icon {...props}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></Icon>;
+        const ChevronLeft = (props) => <Icon {...props}><path d="m15 18-6-6 6-6"/></Icon>;
+        const BrainCircuit = (props) => <Icon {...props}><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M19.938 10.5a4 4 0 0 1 .585.396"/><path d="M6 18a4 4 0 0 1-1.97-3.284"/><path d="M17.97 14.716A4 4 0 0 1 16 18"/></Icon>;
+        const CheckCircle = (props) => <Icon {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></Icon>;
+        const PenTool = (props) => <Icon {...props}><path d="m12 19 7-7 3 3-7 7-3-3z"/><path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="m2 2 7.586 7.586"/><circle cx="11" cy="11" r="2"/></Icon>;
+        const Layers = (props) => <Icon {...props}><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></Icon>;
+        const Music = (props) => <Icon {...props}><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></Icon>;
+        const FileText = (props) => <Icon {...props}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></Icon>;
+        const Play = (props) => <Icon {...props}><polygon points="5 3 19 12 5 21 5 3"/></Icon>;
+        const Sparkles = (props) => <Icon {...props}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></Icon>;
+
+        const MandalaBackground = () => (
+            <div className="fixed inset-0 pointer-events-none z-[-1] overflow-hidden opacity-10">
+                <svg className="absolute -top-40 -left-40 w-[600px] h-[600px] text-orange-300 animate-spin-slow" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="0.5">
+                    <circle cx="50" cy="50" r="40" />
+                    <circle cx="50" cy="50" r="30" />
+                    <path d="M50 10 L50 90 M10 50 L90 50 M22 22 L78 78 M22 78 L78 22" />
+                    <path d="M50 10 Q70 30 90 50 Q70 70 50 90 Q30 70 10 50 Q30 30 50 10" />
+                </svg>
+                <svg className="absolute top-[30%] -right-20 w-[400px] h-[400px] text-pink-300 animate-spin-slow" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="0.5" style={{animationDirection: 'reverse'}}>
+                    <circle cx="50" cy="50" r="45" />
+                    <path d="M50 5 L60 35 L95 50 L60 65 L50 95 L40 65 L5 50 L40 35 Z" />
+                </svg>
+            </div>
+        );
+
+        // --- Data Helpers ---
+        
+        const getChapters = (subject) => {
+            const common = ["Introduction", "Core Fundamentals", "Basic Concepts", "Understanding The Basics", "Real World Applications", "Advanced Theory", "Problems & Solutions", "Summary & Review"];
+            
+            const subjectSpecific = {
+                'math': ["Number Systems", "Polynomials", "Coordinate Geometry", "Linear Equations", "Lines and Angles", "Triangles", "Statistics", "Probability"],
+                'phy': ["Units and Measurements", "Motion", "Force and Laws of Motion", "Gravitation", "Work and Energy", "Sound", "Light: Reflection & Refraction", "Electricity"],
+                'sci': ["Matter in Our Surroundings", "Is Matter Around Us Pure", "Atoms and Molecules", "The Fundamental Unit of Life", "Tissues", "Motion", "Force and Laws of Motion", "Gravitation"],
+                'soc': ["The French Revolution", "Socialism in Europe", "Nazism and the Rise of Hitler", "Forest Society", "Pastoralists in the Modern World", "Democracy in the Contemporary World", "Constitutional Design", "Electoral Politics"],
+                'eng': ["The Fun They Had", "The Sound of Music", "The Little Girl", "A Truly Beautiful Mind", "The Snake and the Mirror", "My Childhood", "Packing", "Reach for the Top"],
+                'tel': ["Vennela", "Matrubhumi", "Jada", "Swarajyam", "Nene", "Dharmarjunulu", "Sataka Madhurima", "Lakshya Siddhi"]
+            };
+            
+            const names = subjectSpecific[subject.id] || common;
+            
+            return names.map((name, i) => ({
+                id: i + 1,
+                title: name,
+                desc: "Tap to access notes, videos, worksheets, and quizzes for this chapter.",
+                resources: ["Read", "Audio", "Video", "Quiz"]
+            }));
+        };
+
+        // --- Components ---
+
+        const Header = ({ goHome }) => (
+            <header className="sticky top-0 z-50 glass backdrop-blur-md px-3 md:px-4 py-2 md:py-3 mb-4 md:mb-6 rounded-b-3xl shadow-sm border-b border-white/40">
+                <div className="flex items-center justify-between max-w-4xl mx-auto">
+                    <div className="flex items-center gap-2 md:gap-3 cursor-pointer" onClick={goHome}>
+                        <div className="relative w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-orange-100 rounded-full shadow-inner flex-shrink-0">
+                            <LotusIcon className="w-6 h-6 md:w-8 md:h-8 text-orange-500" />
+                        </div>
+                        <div>
+                            <h1 className="font-sacred text-base md:text-xl text-orange-800 tracking-wide leading-tight">Sri Guru Dakshinamurthy</h1>
+                            <p className="text-[9px] md:text-[10px] text-gray-500 uppercase tracking-widest font-semibold">Learn for Life, Not Just for Exams</p>
+                        </div>
+                    </div>
+                    
+                    {/* Decorative Jasmine string graphic - Hidden on Mobile */}
+                    <div className="hidden md:flex gap-1 opacity-60">
+                         {[1,2,3,4].map(i => (
+                             <div key={i} className="w-3 h-3 rounded-full bg-white border border-yellow-200 shadow-sm"></div>
+                         ))}
+                    </div>
+                </div>
+            </header>
+        );
+
+        const Footer = () => (
+            <footer className="mt-auto py-6 md:py-8 text-center relative overflow-hidden px-4">
+                <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-orange-300 to-transparent opacity-50"></div>
+                <div className="relative z-10 flex flex-col items-center gap-2">
+                    <LotusIcon className="w-6 h-6 text-pink-400 opacity-60" />
+                    <p className="text-sm font-sacred text-gray-600">Made for Every Student. With Love & Light.</p>
+                    <p className="text-xs text-gray-400">Optimized for Village Connectivity</p>
+                </div>
+            </footer>
+        );
+
+        // --- Coming Soon Modal ---
+        const ComingSoonModal = ({ onClose, classNum }) => (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                <div className="absolute inset-0 bg-black/20 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
+                <div className="bg-white/95 rounded-3xl p-6 md:p-8 max-w-sm w-full relative z-10 text-center animate-pop-in shadow-2xl border-4 border-orange-100 mx-4">
+                    <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-white p-3 md:p-4 rounded-full shadow-lg border-2 border-orange-100">
+                        <LotusIcon className="w-10 h-10 md:w-12 md:h-12 text-orange-400 animate-float" />
+                    </div>
+                    
+                    <div className="mt-6 md:mt-8">
+                        <h3 className="text-xl md:text-2xl font-bold text-orange-800 font-sacred mb-2">Creating Magic</h3>
+                        <div className="w-16 h-1 bg-orange-300 mx-auto rounded-full mb-4"></div>
+                        <p className="text-sm md:text-base text-gray-600 mb-6 leading-relaxed">
+                            We are currently preparing beautiful lessons for <strong>Class {classNum}</strong>. 
+                            <br/><br/>
+                            <span className="text-sm text-pink-500 font-semibold flex items-center justify-center gap-2">
+                                <Sparkles size={16} /> Coming Soon!
+                            </span>
+                        </p>
+                        <button 
+                            onClick={onClose} 
+                            className="w-full clay-btn clay-primary py-3 rounded-xl font-bold flex items-center justify-center gap-2 text-sm md:text-base"
+                        >
+                            Okay, I'll wait
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+
+        // --- Quiz Coming Soon Modal ---
+        const QuizModal = ({ onClose }) => (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                <div className="absolute inset-0 bg-black/20 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
+                <div className="bg-white/95 rounded-3xl p-6 md:p-8 max-w-sm w-full relative z-10 text-center animate-pop-in shadow-2xl border-4 border-orange-100 mx-4">
+                    <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-white p-3 md:p-4 rounded-full shadow-lg border-2 border-orange-100">
+                        <CheckCircle className="w-10 h-10 md:w-12 md:h-12 text-green-500 animate-float" />
+                    </div>
+                    
+                    <div className="mt-6 md:mt-8">
+                        <h3 className="text-xl md:text-2xl font-bold text-gray-800 font-sacred mb-2">Quiz Mode</h3>
+                        <div className="w-16 h-1 bg-green-300 mx-auto rounded-full mb-4"></div>
+                        <p className="text-sm md:text-base text-gray-600 mb-6 leading-relaxed">
+                            We are crafting interactive quizzes to help you test your knowledge.
+                            <br/><br/>
+                            <span className="text-sm text-orange-500 font-semibold flex items-center justify-center gap-2">
+                                <Sparkles size={16} /> Feature Coming Soon!
+                            </span>
+                        </p>
+                        <button 
+                            onClick={onClose} 
+                            className="w-full clay-btn clay-green py-3 rounded-xl font-bold flex items-center justify-center gap-2 text-green-800 text-sm md:text-base"
+                        >
+                            Okay, I'll Prepare
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+
+        // --- Views ---
+
+        const HeroView = ({ onStart }) => (
+            <div className="flex flex-col items-center justify-center text-center space-y-6 md:space-y-8 animate-float py-6 md:py-10">
+                <div className="relative w-full max-w-sm">
+                    <div className="absolute inset-0 bg-orange-300 blur-3xl opacity-20 rounded-full scale-150"></div>
+                    <div className="glass-card p-6 md:p-8 rounded-3xl mx-auto shadow-xl border border-white/60 relative z-10">
+                        <LotusIcon className="w-16 h-16 md:w-20 md:h-20 text-orange-400 mx-auto mb-4 drop-shadow-lg" />
+                        <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2 font-sacred">Namaste Student</h2>
+                        <p className="text-sm md:text-base text-gray-600 mb-6 leading-relaxed">Smart Digital Learning for Every Village Student. Accessible, peaceful, and free.</p>
+                        
+                        <div className="flex justify-around mb-6 text-gray-500 text-xs font-semibold">
+                            <div className="flex flex-col items-center gap-1">
+                                <div className="p-2 bg-pink-100 rounded-full"><BookOpen size={16} className="text-pink-600"/></div>
+                                <span>Subjects</span>
+                            </div>
+                            <div className="flex flex-col items-center gap-1">
+                                <div className="p-2 bg-blue-100 rounded-full"><Video size={16} className="text-blue-600"/></div>
+                                <span>Classes</span>
+                            </div>
+                            <div className="flex flex-col items-center gap-1">
+                                <div className="p-2 bg-green-100 rounded-full"><Download size={16} className="text-green-600"/></div>
+                                <span>Offline</span>
+                            </div>
+                        </div>
+
+                        <button 
+                            onClick={onStart}
+                            className="w-full clay-btn clay-orange py-3 md:py-4 px-6 md:px-8 text-base md:text-lg font-bold rounded-xl flex items-center justify-center gap-2 hover:scale-105 active:scale-95 transition-transform"
+                        >
+                            Start Learning <ArrowRight size={20} />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const MediumSelection = ({ onSelect }) => (
+            <div className="max-w-md mx-auto space-y-4 md:space-y-6 animate-slide-up">
+                <h3 className="text-center text-lg md:text-xl font-bold text-gray-700 mb-2 md:mb-4 font-sacred">Select Your Medium</h3>
+                <div className="grid grid-cols-1 gap-4 md:gap-6">
+                    <button onClick={() => onSelect('English')} className="group w-full">
+                        <div className="clay-btn clay-accent p-4 md:p-6 rounded-2xl flex items-center justify-between hover:-translate-y-1 transition-transform">
+                            <div className="flex items-center gap-3 md:gap-4">
+                                <div className="bg-white/50 p-2 md:p-3 rounded-full"><span className="text-xl md:text-2xl">A</span></div>
+                                <div className="text-left">
+                                    <h4 className="text-lg md:text-xl font-bold">English Medium</h4>
+                                    <p className="text-xs md:text-sm opacity-80">Global Standard</p>
+                                </div>
+                            </div>
+                            <ChevronLeft className="rotate-180 opacity-50" />
+                        </div>
+                    </button>
+                    
+                    <button onClick={() => onSelect('Telugu')} className="group w-full">
+                        <div className="clay-btn clay-primary p-4 md:p-6 rounded-2xl flex items-center justify-between hover:-translate-y-1 transition-transform">
+                            <div className="flex items-center gap-3 md:gap-4">
+                                <div className="bg-white/50 p-2 md:p-3 rounded-full"><span className="text-xl md:text-2xl font-serif">అ</span></div>
+                                <div className="text-left">
+                                    <h4 className="text-lg md:text-xl font-bold">Telugu Medium</h4>
+                                    <p className="text-xs md:text-sm opacity-80">Regional Excellence</p>
+                                </div>
+                            </div>
+                            <ChevronLeft className="rotate-180 opacity-50" />
+                        </div>
+                    </button>
+                </div>
+            </div>
+        );
+
+        const ClassSelection = ({ medium, onSelect }) => {
+            const classes = Array.from({ length: 10 }, (_, i) => i + 1);
+            const [comingSoonClass, setComingSoonClass] = useState(null);
+
+            const handleClassClick = (cls) => {
+                if (cls <= 5) {
+                    setComingSoonClass(cls);
+                } else {
+                    onSelect(cls);
+                }
+            };
+
+            return (
+                <div className="max-w-2xl mx-auto animate-slide-up">
+                    {comingSoonClass && (
+                        <ComingSoonModal 
+                            classNum={comingSoonClass} 
+                            onClose={() => setComingSoonClass(null)} 
+                        />
+                    )}
+
+                    <h3 className="text-center text-lg md:text-xl font-bold text-gray-700 mb-2 font-sacred">Select Class</h3>
+                    <p className="text-center text-xs md:text-sm text-gray-500 mb-6 md:mb-8">{medium} Medium</p>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
+                        {classes.map((cls) => (
+                            <button 
+                                key={cls}
+                                onClick={() => handleClassClick(cls)}
+                                className={`clay-btn aspect-square rounded-2xl flex flex-col items-center justify-center gap-1 hover:-translate-y-1 transition-transform ${cls <= 5 ? 'bg-orange-50/50 hover:bg-orange-50' : 'bg-white hover:bg-orange-50'}`}
+                            >
+                                <span className="text-[10px] md:text-xs text-gray-400 uppercase">Class</span>
+                                <span className="text-2xl md:text-3xl font-bold text-orange-600 font-sacred">{cls}</span>
+                                {cls <= 5 && (
+                                    <span className="text-[9px] md:text-[10px] text-pink-500 font-bold bg-pink-100 px-2 py-0.5 rounded-full mt-1">Soon</span>
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const SubjectSelection = ({ cls, onSelect }) => {
+            const subjects = [
+                { id: 'math', name: 'Mathematics', icon: BrainCircuit, color: 'text-blue-600', bg: 'bg-blue-100' },
+                { id: 'phy', name: 'Physical Science', icon: Sparkles, color: 'text-purple-600', bg: 'bg-purple-100' },
+                { id: 'sci', name: 'Gen Science', icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-100' },
+                { id: 'eng', name: 'English', icon: PenTool, color: 'text-pink-600', bg: 'bg-pink-100' },
+                { id: 'soc', name: 'Social Studies', icon: Layers, color: 'text-orange-600', bg: 'bg-orange-100' },
+                { id: 'tel', name: 'Telugu', icon: BookOpen, color: 'text-yellow-600', bg: 'bg-yellow-100' },
+                { id: 'hin', name: 'Hindi', icon: BookOpen, color: 'text-red-600', bg: 'bg-red-100' },
+            ];
+
+            return (
+                <div className="max-w-2xl mx-auto animate-slide-up">
+                    <h3 className="text-center text-lg md:text-xl font-bold text-gray-700 mb-2 font-sacred">Class {cls} Subjects</h3>
+                    <p className="text-center text-xs md:text-sm text-gray-500 mb-6 md:mb-8">Select a subject to start learning</p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                        {subjects.map((sub) => (
+                            <button 
+                                key={sub.id}
+                                onClick={() => onSelect(sub)}
+                                className="glass-card p-3 md:p-4 rounded-2xl flex items-center gap-3 md:gap-4 hover:shadow-lg hover:border-orange-200 transition-all text-left group"
+                            >
+                                <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl ${sub.bg} flex items-center justify-center shadow-inner flex-shrink-0`}>
+                                    <sub.icon className={`${sub.color}`} size={20} />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <h4 className="font-bold text-gray-800 text-sm md:text-base truncate">{sub.name}</h4>
+                                    <p className="text-[10px] md:text-xs text-gray-500">12 Chapters</p>
+                                </div>
+                                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm flex-shrink-0">
+                                    <ChevronLeft size={16} className="rotate-180 text-gray-400" />
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const ChapterSelection = ({ cls, subject, onSelectChapter }) => {
+            const chapters = getChapters(subject);
+
+            return (
+                <div className="max-w-xl mx-auto animate-slide-up pb-10">
+                    <div className="text-center mb-6 md:mb-8">
+                        <span className="inline-block px-3 py-1 bg-white/60 rounded-full text-[10px] md:text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">
+                            Class {cls} • {subject.name}
+                        </span>
+                        <h3 className="text-lg md:text-xl font-bold text-gray-700 font-sacred">Select Chapter</h3>
+                    </div>
+
+                    <div className="space-y-3 md:space-y-4">
+                        {chapters.map((chapter) => (
+                            <button 
+                                key={chapter.id}
+                                onClick={() => onSelectChapter(chapter)}
+                                className="w-full clay-btn clay-white p-3 md:p-4 rounded-2xl flex flex-col gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all text-left border-l-4 border-l-transparent hover:border-l-orange-400"
+                            >
+                                <div className="flex items-start justify-between w-full">
+                                    <div className="flex gap-3 md:gap-4 items-center">
+                                        <div className="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold shadow-inner text-sm md:text-base">
+                                            {chapter.id}
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-gray-800 text-sm md:text-lg leading-tight mb-0.5 md:mb-1 line-clamp-2">{chapter.title}</h4>
+                                            <p className="text-[10px] md:text-xs text-gray-500 line-clamp-1">Tap to open resources</p>
+                                        </div>
+                                    </div>
+                                    <div className="p-1.5 md:p-2 bg-gray-50 rounded-full text-gray-400 flex-shrink-0">
+                                        <Play size={14} fill="currentColor" />
+                                    </div>
+                                </div>
+                                
+                                <div className="w-full h-px bg-gray-100"></div>
+                                
+                                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-gray-400">
+                                    <div className="flex items-center gap-1 text-[9px] md:text-[10px] font-semibold uppercase tracking-wide">
+                                        <BookOpen size={10} className="text-blue-400" /> Read
+                                    </div>
+                                    <div className="flex items-center gap-1 text-[9px] md:text-[10px] font-semibold uppercase tracking-wide">
+                                        <Video size={10} className="text-pink-400" /> Video
+                                    </div>
+                                    <div className="flex items-center gap-1 text-[9px] md:text-[10px] font-semibold uppercase tracking-wide">
+                                        <CheckCircle size={10} className="text-green-400" /> Quiz
+                                    </div>
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const LessonView = ({ subject, cls, chapter }) => {
+            const [downloading, setDownloading] = useState(false);
+            const [showQuizModal, setShowQuizModal] = useState(false);
+
+            const handleDownload = () => {
+                setDownloading(true);
+                setTimeout(() => {
+                    setDownloading(false);
+                    alert(`Download started for ${chapter.title}! Files will be saved to your device.`);
+                }, 1500);
+            };
+
+            const resources = [
+                { id: 'read', name: 'Read Notes', icon: BookOpen, type: 'clay-btn bg-white text-gray-700' },
+                { id: 'audio', name: 'Audio Explanation', icon: Music, type: 'clay-btn clay-primary' },
+                { id: 'video', name: 'Video Summary', icon: Video, type: 'clay-btn clay-accent' },
+                { id: 'mindmap', name: 'Mind Map', icon: BrainCircuit, type: 'clay-btn clay-purple' },
+                { id: 'worksheet', name: 'Worksheets', icon: FileText, type: 'clay-btn clay-green' },
+                { id: 'quiz', name: 'Take Quiz', icon: CheckCircle, type: 'clay-btn clay-orange' },
+            ];
+
+            const handleResourceClick = (id) => {
+                if (id === 'quiz') {
+                    setShowQuizModal(true);
+                }
+            };
+
+            return (
+                <div className="max-w-xl mx-auto space-y-4 md:space-y-6 pb-20 animate-slide-up">
+                    {showQuizModal && <QuizModal onClose={() => setShowQuizModal(false)} />}
+
+                    {/* Header Card */}
+                    <div className="glass p-5 md:p-6 rounded-3xl text-center relative overflow-hidden border-b-4 border-orange-200">
+                        <LotusIcon className="absolute -left-6 -top-6 w-20 h-20 md:w-24 md:h-24 text-orange-100 opacity-50" />
+                        <LotusIcon className="absolute -right-6 -bottom-6 w-20 h-20 md:w-24 md:h-24 text-pink-100 opacity-50" />
+                        
+                        <span className="inline-block px-3 py-1 bg-white/60 rounded-full text-[10px] md:text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">
+                            Class {cls} • {subject.name}
+                        </span>
+                        <h2 className="text-xl md:text-2xl font-bold text-gray-800 font-sacred mb-1 leading-tight">Chapter {chapter.id}: {chapter.title}</h2>
+                        <p className="text-xs md:text-sm text-gray-600">Access all learning materials below.</p>
+                    </div>
+
+                    {/* Download ZIP Button */}
+                    <button 
+                        onClick={handleDownload}
+                        className="w-full clay-btn bg-gradient-to-r from-orange-400 to-pink-500 text-white p-4 md:p-5 rounded-2xl flex items-center justify-between shadow-lg transform transition-transform hover:scale-[1.01]"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="bg-white/20 p-2 rounded-lg flex-shrink-0">
+                                <Download size={20} className={downloading ? "animate-bounce" : ""} />
+                            </div>
+                            <div className="text-left min-w-0">
+                                <span className="block font-bold text-base md:text-lg truncate">Download All</span>
+                                <span className="text-[10px] md:text-xs opacity-90 block">ZIP File • 12MB • Offline Use</span>
+                            </div>
+                        </div>
+                    </button>
+
+                    <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent w-full my-2 md:my-4"></div>
+
+                    {/* Grid of Resources */}
+                    <div className="grid grid-cols-2 gap-3 md:gap-4">
+                        {resources.map((res, idx) => (
+                            <button 
+                                key={idx} 
+                                onClick={() => handleResourceClick(res.id)}
+                                className={`${res.type} p-3 md:p-4 rounded-2xl flex flex-col items-center justify-center gap-2 min-h-[100px] md:min-h-[120px] hover:scale-105 transition-transform`}
+                            >
+                                <res.icon size={24} className="opacity-80" />
+                                <span className="font-bold text-xs md:text-sm text-center leading-tight">{res.name}</span>
+                                {res.id === 'quiz' && (
+                                    <span className="text-[9px] md:text-[10px] bg-white/40 px-2 py-0.5 rounded-full font-semibold">Soon</span>
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // --- Main App Controller ---
+
+        const App = () => {
+            const [view, setView] = useState('home'); // home, medium, class, subject, chapter, lesson
+            const [data, setData] = useState({ medium: null, class: null, subject: null, chapter: null });
+
+            const goBack = () => {
+                if (view === 'lesson') setView('chapter');
+                else if (view === 'chapter') setView('subject');
+                else if (view === 'subject') setView('class');
+                else if (view === 'class') setView('medium');
+                else if (view === 'medium') setView('home');
+            };
+
+            const reset = () => {
+                setView('home');
+                setData({ medium: null, class: null, subject: null, chapter: null });
+            };
+
+            return (
+                <div className="min-h-screen relative">
+                    <MandalaBackground />
+                    
+                    <Header goHome={reset} />
+
+                    <main className="px-4 py-2 max-w-4xl mx-auto relative z-10 min-h-[75vh]">
+                        {view !== 'home' && (
+                            <button onClick={goBack} className="mb-4 flex items-center text-gray-500 hover:text-orange-600 transition-colors text-xs md:text-sm font-semibold">
+                                <ChevronLeft size={16} /> Back
+                            </button>
+                        )}
+
+                        {view === 'home' && (
+                            <HeroView onStart={() => setView('medium')} />
+                        )}
+
+                        {view === 'medium' && (
+                            <MediumSelection onSelect={(m) => {
+                                setData({...data, medium: m});
+                                setView('class');
+                            }} />
+                        )}
+
+                        {view === 'class' && (
+                            <ClassSelection 
+                                medium={data.medium} 
+                                onSelect={(c) => {
+                                    setData({...data, class: c});
+                                    setView('subject');
+                                }} 
+                            />
+                        )}
+
+                        {view === 'subject' && (
+                            <SubjectSelection 
+                                cls={data.class}
+                                onSelect={(s) => {
+                                    setData({...data, subject: s});
+                                    setView('chapter');
+                                }}
+                            />
+                        )}
+
+                        {view === 'chapter' && (
+                            <ChapterSelection 
+                                cls={data.class}
+                                subject={data.subject}
+                                onSelectChapter={(ch) => {
+                                    setData({...data, chapter: ch});
+                                    setView('lesson');
+                                }}
+                            />
+                        )}
+
+                        {view === 'lesson' && (
+                            <LessonView 
+                                subject={data.subject} 
+                                cls={data.class} 
+                                chapter={data.chapter} 
+                            />
+                        )}
+                    </main>
+
+                    <Footer />
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

@@ -85,30 +85,12 @@
             transform: translateY(2px);
         }
 
-        .clay-primary {
-            background-color: #fce7f3; /* Pinkish */
-            color: #831843;
-        }
-        .clay-accent {
-            background-color: #e0f2fe; /* Bluish */
-            color: #075985;
-        }
-        .clay-orange {
-            background-color: #ffedd5; /* Orangeish */
-            color: #9a3412;
-        }
-        .clay-green {
-            background-color: #dcfce7;
-            color: #166534;
-        }
-        .clay-purple {
-            background-color: #f3e8ff;
-            color: #6b21a8;
-        }
-        .clay-white {
-            background-color: #ffffff;
-            color: #374151;
-        }
+        .clay-primary { background-color: #fce7f3; color: #831843; }
+        .clay-accent { background-color: #e0f2fe; color: #075985; }
+        .clay-orange { background-color: #ffedd5; color: #9a3412; }
+        .clay-green { background-color: #dcfce7; color: #166534; }
+        .clay-purple { background-color: #f3e8ff; color: #6b21a8; }
+        .clay-white { background-color: #ffffff; color: #374151; }
 
         /* Animations */
         @keyframes float {
@@ -132,33 +114,33 @@
             100% { transform: scale(1); opacity: 1; }
         }
 
-        .animate-float {
-            animation: float 6s ease-in-out infinite;
-        }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        .animate-spin-slow { animation: spin-slow 60s linear infinite; }
+        .animate-slide-up { animation: slide-up 0.4s ease-out forwards; }
+        .animate-pop-in { animation: pop-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 
-        .animate-spin-slow {
-            animation: spin-slow 60s linear infinite;
+        /* Masking Frame Styles */
+        .mask-container {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            animation: slide-up 0.3s ease-out;
         }
         
-        .animate-slide-up {
-            animation: slide-up 0.4s ease-out forwards;
-        }
-
-        .animate-pop-in {
-            animation: pop-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        .mask-frame {
+            flex: 1;
+            width: 100%;
+            border: none;
+            background: #fff;
         }
 
         /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.05);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(0,0,0,0.1);
-            border-radius: 10px;
-        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -167,7 +149,40 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // --- SVGs & Icons (Inline for Reliability & Performance) ---
+        // ========================================================
+        // 🛠️ LINK CONFIGURATION (PASTE YOUR LINKS HERE)
+        // ========================================================
+        
+        // Format: "class-subject-chapter-type": "YOUR_LINK"
+        // type codes: read, audio, video, mindmap, worksheet
+        
+        const RESOURCE_DATABASE = {
+            // --- Examples for Class 10 Math, Chapter 1 ---
+            "10-math-1-read": "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji/assets/PDF/pdf.png", // Example PDF Link
+            "10-math-1-video": "https://www.youtube.com/embed/dQw4w9WgXcQ", // Example Video (Youtube Embeds work great)
+            "10-math-1-audio": "https://example.com/audio.mp3",
+            
+            // --- Examples for Class 10 Physics, Chapter 1 ---
+            "10-phy-1-read": "https://example.com/physics-notes.pdf",
+            
+            // --- Default Fallback Link (If you forget to add a specific link) ---
+            "default": "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji/assets/High%20Contrast/Please/please_high_contrast.png" 
+        };
+
+        // Helper to find the link
+        const getResourceLink = (cls, subjectId, chapterId, type) => {
+            // Try to find exact match: "10-math-1-read"
+            const key = `${cls}-${subjectId}-${chapterId}-${type}`;
+            if (RESOURCE_DATABASE[key]) return RESOURCE_DATABASE[key];
+            
+            // If not found, return default
+            console.log(`Link not found for key: ${key}. Using default.`);
+            return RESOURCE_DATABASE["default"];
+        };
+
+        // ========================================================
+        // --- ICONS & ASSETS ---
+        // ========================================================
 
         const LotusIcon = ({ className }) => (
             <svg viewBox="0 0 100 100" className={className} fill="currentColor">
@@ -178,20 +193,8 @@
             </svg>
         );
 
-        // Helper for Lucide-style icons
         const Icon = ({ children, size = 24, className = "" }) => (
-            <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                width={size} 
-                height={size} 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                className={className}
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
                 {children}
             </svg>
         );
@@ -209,6 +212,7 @@
         const FileText = (props) => <Icon {...props}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></Icon>;
         const Play = (props) => <Icon {...props}><polygon points="5 3 19 12 5 21 5 3"/></Icon>;
         const Sparkles = (props) => <Icon {...props}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></Icon>;
+        const XIcon = (props) => <Icon {...props}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></Icon>;
 
         const MandalaBackground = () => (
             <div className="fixed inset-0 pointer-events-none z-[-1] overflow-hidden opacity-10">
@@ -225,8 +229,6 @@
             </div>
         );
 
-        // --- Data Helpers ---
-        
         const getChapters = (subject) => {
             const common = ["Introduction", "Core Fundamentals", "Basic Concepts", "Understanding The Basics", "Real World Applications", "Advanced Theory", "Problems & Solutions", "Summary & Review"];
             
@@ -249,7 +251,9 @@
             }));
         };
 
-        // --- Components ---
+        // ========================================================
+        // --- COMPONENTS ---
+        // ========================================================
 
         const Header = ({ goHome }) => (
             <header className="sticky top-0 z-50 glass backdrop-blur-md px-3 md:px-4 py-2 md:py-3 mb-4 md:mb-6 rounded-b-3xl shadow-sm border-b border-white/40">
@@ -264,7 +268,6 @@
                         </div>
                     </div>
                     
-                    {/* Decorative Jasmine string graphic - Hidden on Mobile */}
                     <div className="hidden md:flex gap-1 opacity-60">
                          {[1,2,3,4].map(i => (
                              <div key={i} className="w-3 h-3 rounded-full bg-white border border-yellow-200 shadow-sm"></div>
@@ -285,7 +288,52 @@
             </footer>
         );
 
-        // --- Coming Soon Modal ---
+        // --- MASKED VIEWER (The Magic Part) ---
+        const MaskedResourceView = ({ url, title, onClose }) => {
+            const [loading, setLoading] = useState(true);
+
+            return (
+                <div className="mask-container">
+                    {/* Toolbar */}
+                    <div className="bg-white border-b border-gray-200 p-3 flex items-center justify-between shadow-sm z-10">
+                        <div className="flex items-center gap-3">
+                            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                                <ChevronLeft size={24} className="text-gray-600" />
+                            </button>
+                            <div>
+                                <h3 className="font-bold text-gray-800 text-sm md:text-base line-clamp-1">{title}</h3>
+                                <p className="text-[10px] text-green-600 flex items-center gap-1">
+                                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Secure View
+                                </p>
+                            </div>
+                        </div>
+                        <button onClick={onClose} className="p-2 bg-gray-50 rounded-full hover:bg-red-50 hover:text-red-600 transition-colors">
+                            <XIcon size={20} />
+                        </button>
+                    </div>
+
+                    {/* Loader */}
+                    {loading && (
+                        <div className="absolute inset-0 top-16 bg-white z-0 flex items-center justify-center">
+                            <div className="flex flex-col items-center gap-3 animate-pulse">
+                                <div className="w-10 h-10 border-4 border-orange-200 border-t-orange-600 rounded-full animate-spin"></div>
+                                <span className="text-sm text-gray-500 font-medium">Loading Resource...</span>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* The Secret Iframe */}
+                    <iframe 
+                        src={url} 
+                        className="mask-frame"
+                        onLoad={() => setLoading(false)}
+                        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+                    ></iframe>
+                </div>
+            );
+        };
+
+        // --- Modals ---
         const ComingSoonModal = ({ onClose, classNum }) => (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                 <div className="absolute inset-0 bg-black/20 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
@@ -315,7 +363,6 @@
             </div>
         );
 
-        // --- Quiz Coming Soon Modal ---
         const QuizModal = ({ onClose }) => (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                 <div className="absolute inset-0 bg-black/20 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
@@ -552,7 +599,7 @@
             );
         };
 
-        const LessonView = ({ subject, cls, chapter }) => {
+        const LessonView = ({ subject, cls, chapter, onOpenResource }) => {
             const [downloading, setDownloading] = useState(false);
             const [showQuizModal, setShowQuizModal] = useState(false);
 
@@ -573,9 +620,12 @@
                 { id: 'quiz', name: 'Take Quiz', icon: CheckCircle, type: 'clay-btn clay-orange' },
             ];
 
-            const handleResourceClick = (id) => {
-                if (id === 'quiz') {
+            const handleResourceClick = (type) => {
+                if (type === 'quiz') {
                     setShowQuizModal(true);
+                } else {
+                    // Open the Masked Viewer for this specific resource
+                    onOpenResource(type);
                 }
             };
 
@@ -638,6 +688,9 @@
         const App = () => {
             const [view, setView] = useState('home'); // home, medium, class, subject, chapter, lesson
             const [data, setData] = useState({ medium: null, class: null, subject: null, chapter: null });
+            
+            // New State for Masked Resource Viewer
+            const [activeResource, setActiveResource] = useState(null); // { url, title }
 
             const goBack = () => {
                 if (view === 'lesson') setView('chapter');
@@ -650,6 +703,31 @@
             const reset = () => {
                 setView('home');
                 setData({ medium: null, class: null, subject: null, chapter: null });
+                setActiveResource(null);
+            };
+
+            // Logic to open the masked viewer
+            const openResource = (type) => {
+                const url = getResourceLink(data.class, data.subject.id, data.chapter.id, type);
+                const title = `${data.subject.name} - Ch ${data.chapter.id} (${type.toUpperCase()})`;
+                
+                // Set active resource to show the mask
+                setActiveResource({ url, title });
+
+                // Update URL for masking (optional advanced feature)
+                try {
+                    const newUrl = `?view=${type}&class=${data.class}&subject=${data.subject.id}&ch=${data.chapter.id}`;
+                    window.history.pushState({ path: newUrl }, '', newUrl);
+                } catch(e) {}
+            };
+
+            const closeResource = () => {
+                setActiveResource(null);
+                // Reset URL
+                try {
+                    const cleanUrl = window.location.pathname;
+                    window.history.pushState({ path: cleanUrl }, '', cleanUrl);
+                } catch(e) {}
             };
 
             return (
@@ -658,65 +736,75 @@
                     
                     <Header goHome={reset} />
 
-                    <main className="px-4 py-2 max-w-4xl mx-auto relative z-10 min-h-[75vh]">
-                        {view !== 'home' && (
-                            <button onClick={goBack} className="mb-4 flex items-center text-gray-500 hover:text-orange-600 transition-colors text-xs md:text-sm font-semibold">
-                                <ChevronLeft size={16} /> Back
-                            </button>
-                        )}
+                    {/* IF MASK ACTIVE, SHOW IT. ELSE SHOW APP */}
+                    {activeResource ? (
+                        <MaskedResourceView 
+                            url={activeResource.url} 
+                            title={activeResource.title} 
+                            onClose={closeResource} 
+                        />
+                    ) : (
+                        <main className="px-4 py-2 max-w-4xl mx-auto relative z-10 min-h-[75vh]">
+                            {view !== 'home' && (
+                                <button onClick={goBack} className="mb-4 flex items-center text-gray-500 hover:text-orange-600 transition-colors text-xs md:text-sm font-semibold">
+                                    <ChevronLeft size={16} /> Back
+                                </button>
+                            )}
 
-                        {view === 'home' && (
-                            <HeroView onStart={() => setView('medium')} />
-                        )}
+                            {view === 'home' && (
+                                <HeroView onStart={() => setView('medium')} />
+                            )}
 
-                        {view === 'medium' && (
-                            <MediumSelection onSelect={(m) => {
-                                setData({...data, medium: m});
-                                setView('class');
-                            }} />
-                        )}
+                            {view === 'medium' && (
+                                <MediumSelection onSelect={(m) => {
+                                    setData({...data, medium: m});
+                                    setView('class');
+                                }} />
+                            )}
 
-                        {view === 'class' && (
-                            <ClassSelection 
-                                medium={data.medium} 
-                                onSelect={(c) => {
-                                    setData({...data, class: c});
-                                    setView('subject');
-                                }} 
-                            />
-                        )}
+                            {view === 'class' && (
+                                <ClassSelection 
+                                    medium={data.medium} 
+                                    onSelect={(c) => {
+                                        setData({...data, class: c});
+                                        setView('subject');
+                                    }} 
+                                />
+                            )}
 
-                        {view === 'subject' && (
-                            <SubjectSelection 
-                                cls={data.class}
-                                onSelect={(s) => {
-                                    setData({...data, subject: s});
-                                    setView('chapter');
-                                }}
-                            />
-                        )}
+                            {view === 'subject' && (
+                                <SubjectSelection 
+                                    cls={data.class}
+                                    onSelect={(s) => {
+                                        setData({...data, subject: s});
+                                        setView('chapter');
+                                    }}
+                                />
+                            )}
 
-                        {view === 'chapter' && (
-                            <ChapterSelection 
-                                cls={data.class}
-                                subject={data.subject}
-                                onSelectChapter={(ch) => {
-                                    setData({...data, chapter: ch});
-                                    setView('lesson');
-                                }}
-                            />
-                        )}
+                            {view === 'chapter' && (
+                                <ChapterSelection 
+                                    cls={data.class}
+                                    subject={data.subject}
+                                    onSelectChapter={(ch) => {
+                                        setData({...data, chapter: ch});
+                                        setView('lesson');
+                                    }}
+                                />
+                            )}
 
-                        {view === 'lesson' && (
-                            <LessonView 
-                                subject={data.subject} 
-                                cls={data.class} 
-                                chapter={data.chapter} 
-                            />
-                        )}
-                    </main>
+                            {view === 'lesson' && (
+                                <LessonView 
+                                    subject={data.subject} 
+                                    cls={data.class} 
+                                    chapter={data.chapter} 
+                                    onOpenResource={openResource}
+                                />
+                            )}
+                        </main>
+                    )}
 
-                    <Footer />
+                    {!activeResource && <Footer />}
                 </div>
             );
         };

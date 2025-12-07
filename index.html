@@ -150,30 +150,35 @@
         const { useState, useEffect } = React;
 
         // ========================================================
-        // 🛠️ LINK CONFIGURATION (PASTE YOUR LINKS HERE)
+        // 🛠️ LINK CONFIGURATION (UPDATED FOR SEPARATE MEDIUMS)
         // ========================================================
         
-        // Format: "class-subject-chapter-type": "YOUR_LINK"
-        // type codes: read, audio, video, mindmap, worksheet
+        // Key Format: "medium-class-subject-chapter-type"
+        // medium codes: "em" (English Medium), "tm" (Telugu Medium)
         
         const RESOURCE_DATABASE = {
-            // --- Examples for Class 10 Math, Chapter 1 ---
-            "10-math-1-read": "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji/assets/PDF/pdf.png", // Example PDF Link
-            "10-math-1-video": "https://www.youtube.com/embed/dQw4w9WgXcQ", // Example Video (Youtube Embeds work great)
-            "10-math-1-audio": "https://example.com/audio.mp3",
+            // --- ENGLISH MEDIUM (em) ---
+            "em-10-math-1-read": "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji/assets/PDF/pdf.png", // English PDF
+            "em-10-math-1-video": "https://www.youtube.com/embed/dQw4w9WgXcQ", // English Video
             
-            // --- Examples for Class 10 Physics, Chapter 1 ---
-            "10-phy-1-read": "https://example.com/physics-notes.pdf",
-            "10-phy-1-video": "https://apschoollessonvideos.blogspot.com/2025/12/8th-class-physics-telugu-medium-2025_7.html",
-            
-            // --- Default Fallback Link (If you forget to add a specific link) ---
+            // --- TELUGU MEDIUM (tm) ---
+            "tm-10-math-1-read": "https://example.com/telugu-notes.pdf", // Telugu PDF
+            "tm-10-math-1-video": "https://apschoollessonvideos.blogspot.com/2025/12/8th-class-physics-telugu-medium-2025_7.html", // Telugu Video
+
+            // --- Default Fallback ---
             "default": "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji/assets/High%20Contrast/Please/please_high_contrast.png" 
         };
 
-        // Helper to find the link
-        const getResourceLink = (cls, subjectId, chapterId, type) => {
-            // Try to find exact match: "10-math-1-read"
-            const key = `${cls}-${subjectId}-${chapterId}-${type}`;
+        // Helper to find the link based on MEDIUM
+        const getResourceLink = (medium, cls, subjectId, chapterId, type) => {
+            // Convert full medium name to code
+            const medCode = medium === 'English' ? 'em' : 'tm';
+            
+            // Construct key: e.g., "em-10-math-1-read"
+            const key = `${medCode}-${cls}-${subjectId}-${chapterId}-${type}`;
+            
+            console.log("Looking for key:", key); // Debugging
+
             if (RESOURCE_DATABASE[key]) return RESOURCE_DATABASE[key];
             
             // If not found, return default
@@ -230,11 +235,31 @@
             </div>
         );
 
-        const getChapters = (subject) => {
+        // UPDATED CHAPTERS LOGIC: Handles Medium
+        const getChapters = (subject, medium) => {
             const common = ["Introduction", "Core Fundamentals", "Basic Concepts", "Understanding The Basics", "Real World Applications", "Advanced Theory", "Problems & Solutions", "Summary & Review"];
             
+            // --- TELUGU CHAPTER NAMES (Example for Math) ---
+            if (medium === 'Telugu' && subject.id === 'math') {
+                 return [
+                    "వాస్తవ సంఖ్యలు (Real Numbers)", 
+                    "సమితులు (Sets)", 
+                    "బహుపదులు (Polynomials)", 
+                    "రెండు చరరాశులలో రేఖీయ సమీకరణాల జత (Pair of Linear Equations)", 
+                    "వర్గ సమీకరణాలు (Quadratic Equations)", 
+                    "శ్రేఢులు (Progressions)", 
+                    "నిరూపక రేఖాగణితం (Coordinate Geometry)", 
+                    "సారూప్య త్రిభుజాలు (Similar Triangles)"
+                ].map((name, i) => ({
+                    id: i + 1,
+                    title: name,
+                    desc: "ఈ అధ్యాయం కోసం నోట్స్, వీడియోలు మరియు క్విజ్‌లు.", // Telugu description
+                    resources: ["Read", "Audio", "Video", "Quiz"]
+                }));
+            }
+
             const subjectSpecific = {
-                'math': ["Number Systems", "Polynomials", "Coordinate Geometry", "Linear Equations", "Lines and Angles", "Triangles", "Statistics", "Probability"],
+                'math': ["Real Numbers", "Sets", "Polynomials", "Pair of Linear Equations in Two Variables", "Quadratic Equations", "Progressions", "Coordinate Geometry", "Similar Triangles"],
                 'phy': ["Units and Measurements", "Motion", "Force and Laws of Motion", "Gravitation", "Work and Energy", "Sound", "Light: Reflection & Refraction", "Electricity"],
                 'sci': ["Matter in Our Surroundings", "Is Matter Around Us Pure", "Atoms and Molecules", "The Fundamental Unit of Life", "Tissues", "Motion", "Force and Laws of Motion", "Gravitation"],
                 'soc': ["The French Revolution", "Socialism in Europe", "Nazism and the Rise of Hitler", "Forest Society", "Pastoralists in the Modern World", "Democracy in the Contemporary World", "Constitutional Design", "Electoral Politics"],
@@ -546,14 +571,15 @@
             );
         };
 
-        const ChapterSelection = ({ cls, subject, onSelectChapter }) => {
-            const chapters = getChapters(subject);
+        const ChapterSelection = ({ cls, subject, medium, onSelectChapter }) => {
+            // Pass medium to getChapters
+            const chapters = getChapters(subject, medium);
 
             return (
                 <div className="max-w-xl mx-auto animate-slide-up pb-10">
                     <div className="text-center mb-6 md:mb-8">
                         <span className="inline-block px-3 py-1 bg-white/60 rounded-full text-[10px] md:text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">
-                            Class {cls} • {subject.name}
+                            Class {cls} • {subject.name} • {medium}
                         </span>
                         <h3 className="text-lg md:text-xl font-bold text-gray-700 font-sacred">Select Chapter</h3>
                     </div>
@@ -572,7 +598,7 @@
                                         </div>
                                         <div>
                                             <h4 className="font-bold text-gray-800 text-sm md:text-lg leading-tight mb-0.5 md:mb-1 line-clamp-2">{chapter.title}</h4>
-                                            <p className="text-[10px] md:text-xs text-gray-500 line-clamp-1">Tap to open resources</p>
+                                            <p className="text-[10px] md:text-xs text-gray-500 line-clamp-1">{chapter.desc || "Tap to open resources"}</p>
                                         </div>
                                     </div>
                                     <div className="p-1.5 md:p-2 bg-gray-50 rounded-full text-gray-400 flex-shrink-0">
@@ -600,7 +626,7 @@
             );
         };
 
-        const LessonView = ({ subject, cls, chapter, onOpenResource }) => {
+        const LessonView = ({ subject, cls, chapter, medium, onOpenResource }) => {
             const [downloading, setDownloading] = useState(false);
             const [showQuizModal, setShowQuizModal] = useState(false);
 
@@ -640,7 +666,7 @@
                         <LotusIcon className="absolute -right-6 -bottom-6 w-20 h-20 md:w-24 md:h-24 text-pink-100 opacity-50" />
                         
                         <span className="inline-block px-3 py-1 bg-white/60 rounded-full text-[10px] md:text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">
-                            Class {cls} • {subject.name}
+                            Class {cls} • {subject.name} • {medium}
                         </span>
                         <h2 className="text-xl md:text-2xl font-bold text-gray-800 font-sacred mb-1 leading-tight">Chapter {chapter.id}: {chapter.title}</h2>
                         <p className="text-xs md:text-sm text-gray-600">Access all learning materials below.</p>
@@ -709,7 +735,9 @@
 
             // Logic to open the masked viewer
             const openResource = (type) => {
-                const url = getResourceLink(data.class, data.subject.id, data.chapter.id, type);
+                // FIXED: Now we pass data.medium to the function
+                const url = getResourceLink(data.medium, data.class, data.subject.id, data.chapter.id, type);
+                
                 const title = `${data.subject.name} - Ch ${data.chapter.id} (${type.toUpperCase()})`;
                 
                 // Set active resource to show the mask
@@ -717,7 +745,7 @@
 
                 // Update URL for masking (optional advanced feature)
                 try {
-                    const newUrl = `?view=${type}&class=${data.class}&subject=${data.subject.id}&ch=${data.chapter.id}`;
+                    const newUrl = `?view=${type}&class=${data.class}&subject=${data.subject.id}&ch=${data.chapter.id}&med=${data.medium}`;
                     window.history.pushState({ path: newUrl }, '', newUrl);
                 } catch(e) {}
             };
@@ -787,6 +815,7 @@
                                 <ChapterSelection 
                                     cls={data.class}
                                     subject={data.subject}
+                                    medium={data.medium}
                                     onSelectChapter={(ch) => {
                                         setData({...data, chapter: ch});
                                         setView('lesson');
@@ -799,6 +828,7 @@
                                     subject={data.subject} 
                                     cls={data.class} 
                                     chapter={data.chapter} 
+                                    medium={data.medium}
                                     onOpenResource={openResource}
                                 />
                             )}
